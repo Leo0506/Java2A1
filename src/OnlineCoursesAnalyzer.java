@@ -112,26 +112,65 @@ public class OnlineCoursesAnalyzer {
 
     //4
     public List<String> getCourses(int topK, String by) {
-        Comparator<Course> comparator;
+//        Comparator<Course> comparator;
+//        switch (by) {
+//            case "hours" ->
+//                    comparator = Comparator.comparing(Course::getTotalHours, Comparator.reverseOrder()).thenComparing(Course::getTitle);
+//            case "participants" ->
+//                    comparator = Comparator.comparing(Course::getParticipants, Comparator.reverseOrder()).thenComparing(Course::getTitle);
+//            default -> {
+//                System.out.println("Not a valid by parameter.");
+//                return new ArrayList<>();
+//            }
+//        }
+//
+//        return courses.stream()
+//                .sorted(comparator)
+//                .map(course -> course.title).distinct().limit(topK).toList();
+
+        List<String> results = new ArrayList<>();
         switch (by) {
-            case "hours" ->
-                    comparator = Comparator.comparing(Course::getTotalHours, Comparator.reverseOrder()).thenComparing(Course::getTitle);
-            case "participants" ->
-                    comparator = Comparator.comparing(Course::getParticipants, Comparator.reverseOrder()).thenComparing(Course::getTitle);
+            case "hours" -> {
+                courses.sort(Comparator.comparing(Course::getTotalHours, Comparator.reverseOrder())
+                        .thenComparing(Course::getTitle));
+            }
+            case "participants" -> {
+                courses.sort(Comparator.comparing(Course::getParticipants, Comparator.reverseOrder())
+                        .thenComparing(Course::getTitle));
+            }
             default -> {
                 System.out.println("Not a valid by parameter.");
                 return new ArrayList<>();
             }
         }
-
-        return courses.stream()
-                .sorted(comparator)
-                .map(course -> course.title).distinct().limit(topK).toList();
+        for (Course course : courses) {
+            if (results.contains(course.title)) {
+                continue;
+            }
+            results.add(course.title);
+            if (results.size() == topK) {
+                break;
+            }
+        }
+        return results;
     }
 
     //5
     public List<String> searchCourses(String courseSubject, double percentAudited, double totalCourseHours) {
-        return null;
+        List<String> results = new ArrayList<>();
+
+        for (Course course : courses) {
+            if (course.getSubject().toUpperCase().contains(courseSubject.toUpperCase()) &&
+                    course.getPercentAudited() >= percentAudited &&
+                    course.getTotalHours() <= totalCourseHours) {
+                String title = course.getTitle();
+                if (!results.contains(title)) {
+                    results.add(title);
+                }
+            }
+        }
+        Collections.sort(results);
+        return results;
     }
 
     //6
