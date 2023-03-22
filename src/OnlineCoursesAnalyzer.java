@@ -48,8 +48,8 @@ public class OnlineCoursesAnalyzer {
     public Map<String, Integer> getPtcpCountByInst() {
         Map<String, Integer> map = new TreeMap<>();
         for (Course course : courses) {
-            String institution = course.institution;
-            int participants = course.participants;
+            String institution = course.getInstitution();
+            int participants = course.getParticipants();
             if (!map.containsKey(institution)) {
                 map.put(institution, participants);
             } else {
@@ -63,14 +63,13 @@ public class OnlineCoursesAnalyzer {
     public Map<String, Integer> getPtcpCountByInstAndSubject() {
         Map<String, Integer> map = new HashMap<>();
         for (Course c : courses) {
-            String key = c.institution + "-" + c.subject;
-            int value = c.participants;
+            String key = c.getInstitution() + "-" + c.getSubject();
+            int value = c.getParticipants();
             if (map.containsKey(key)) {
                 value += map.get(key);
             }
             map.put(key, value);
         }
-
         List<Map.Entry<String, Integer>> list = new ArrayList<>(map.entrySet());
         list.sort((o1, o2) -> {
             int valueCompare = o2.getValue().compareTo(o1.getValue());
@@ -80,7 +79,6 @@ public class OnlineCoursesAnalyzer {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
-
         LinkedHashMap<String, Integer> sMap = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> entry : list) {
             sMap.put(entry.getKey(), entry.getValue());
@@ -139,10 +137,10 @@ public class OnlineCoursesAnalyzer {
             }
         }
         for (Course course : courses) {
-            if (results.contains(course.title)) {
+            if (results.contains(course.getTitle())) {
                 continue;
             }
-            results.add(course.title);
+            results.add(course.getTitle());
             if (results.size() == topK) {
                 break;
             }
@@ -153,7 +151,6 @@ public class OnlineCoursesAnalyzer {
     //5
     public List<String> searchCourses(String courseSubject, double percentAudited, double totalCourseHours) {
         List<String> results = new ArrayList<>();
-
         for (Course course : courses) {
             if (course.getSubject().toUpperCase().contains(courseSubject.toUpperCase()) &&
                     course.getPercentAudited() >= percentAudited &&
@@ -170,8 +167,55 @@ public class OnlineCoursesAnalyzer {
 
     //6
     public List<String> recommendCourses(int age, int gender, int isBachelorOrHigher) {
-        return null;
+            Map<String, List<Course>> coursesNumber = new HashMap<>();
+            Map<String, Double> courseValue = new HashMap<>();
+            for (Course course : courses) {
+                coursesNumber.computeIfAbsent(course.getNumber(), k -> new ArrayList<>()).add(course);
+            }
+            for (Map.Entry<String, List<Course>> entry : coursesNumber.entrySet()) {
+                List<Course> courses = entry.getValue();
+                double avgAge = 0;
+                double avgGender = 0;
+                double avgBoH = 0;
+                for (Course course : courses) {
+                    avgAge += course.getMedianAge();
+                    avgGender += course.getPercentMale();
+                    avgBoH += course.getPercentDegree();
+                }
+                avgAge /= courses.size();
+                avgGender /= courses.size();
+                avgBoH /= courses.size();
+                double courseValueScore = Math.pow(age - avgAge, 2) + Math.pow(gender * 100 - avgGender, 2) + Math.pow(isBachelorOrHigher * 100 - avgBoH, 2);
+                courseValue.put(entry.getKey(), courseValueScore);
+            }
+
+            List<Course> recommendedCourses = new ArrayList<>();
+            Set<String> courseNumberSet = new HashSet<>();
+
+            Comparator<Course> courseComparator = (c1, c2) -> {
+                Double value1 = courseValue.get(c1.getNumber());
+                Double value2 = courseValue.get(c2.getNumber());
+                int valueComparison = value2.compareTo(value1);
+                if (valueComparison != 0) {
+                    return valueComparison;
+                }
+                return c1.getTitle().compareTo(c2.getTitle());
+            };
+
+            for (Course course : courses) {
+                if (courseNumberSet.add(course.getNumber())) {
+                    recommendedCourses.add(course);
+                }
+            }
+            recommendedCourses.sort(courseComparator);
+            List<String> recommendedCourseTitles = new ArrayList<>();
+            for (int i = 0; i < Math.min(10, recommendedCourses.size()); i++) {
+                recommendedCourseTitles.add(recommendedCourses.get(i).getTitle());
+            }
+            return recommendedCourseTitles;
+        }
     }
+
 
 
     class Course {
@@ -424,4 +468,4 @@ public class OnlineCoursesAnalyzer {
             this.percentDegree = percentDegree;
         }
     }
-}
+
