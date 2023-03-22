@@ -195,44 +195,24 @@ public class OnlineCoursesAnalyzer {
         Comparator<Course> courseComparator = (c1, c2) -> {
             Double value1 = courseValue.get(c1.getNumber());
             Double value2 = courseValue.get(c2.getNumber());
-            int valueComparison = value1.compareTo(value2);
+            int valueComparison = value2.compareTo(value1);
             if (valueComparison != 0) {
                 return valueComparison;
             }
             return c1.getTitle().compareTo(c2.getTitle());
         };
-        courses.stream().sorted(Comparator.comparing(Course::getLaunchDate).reversed()).forEach(
-            course -> {
-                if(courseNumberSet.add(course.getNumber())) {
-                    recommendedCourses.add(course);
-                }
-            }
-        );
-//        for (Course course : courses) {
-//            if (courseNumberSet.add(course.getNumber())) {
-//                recommendedCourses.add(course);
-//            }
-//        }
-        //recommendedCourses.stream().forEach(System.out::println);
-        //recommendedCourses.sort(courseComparator);
-        return recommendedCourses.stream().sorted(Comparator.comparing((Course c) -> courseValue.get(c.getNumber())).thenComparing(Course::getTitle)).map(Course::getTitle).distinct().limit(10).toList();
 
-//        List<String> recommendedCourseTitles = new ArrayList<>();
-//        for (int i = 0; i < Math.min(10, recommendedCourses.size()); i++) {
-//            recommendedCourseTitles.add(recommendedCourses.get(i).getTitle());
-//        }
-//        Set<String> set = new HashSet<String>(recommendedCourseTitles);
-//        recommendedCourseTitles.clear();
-//        recommendedCourseTitles.addAll(set);
-//        for (int i = 0; i < recommendedCourseTitles.size() - 1; i++) {
-//            for (int j = i + 1; j < recommendedCourseTitles.size(); j++) {
-//                if (recommendedCourseTitles.get(i).equals(recommendedCourseTitles.get(j))) {
-//                    recommendedCourseTitles.remove(j);
-//                    j--;
-//                }
-//            }
-//        }
-//        return recommendedCourseTitles;
+        for (Course course : courses) {
+            if (courseNumberSet.add(course.getNumber())) {
+                recommendedCourses.add(course);
+            }
+        }
+        recommendedCourses.sort(courseComparator);
+        List<String> recommendedCourseTitles = new ArrayList<>();
+        for (int i = 0; i < Math.min(10, recommendedCourses.size()); i++) {
+            recommendedCourseTitles.add(recommendedCourses.get(i).getTitle());
+        }
+        return recommendedCourseTitles;
     }
 }
 
