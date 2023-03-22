@@ -90,10 +90,14 @@ public class OnlineCoursesAnalyzer {
 
     //3
     public Map<String, List<List<String>>> getCourseListOfInstructor() {
+
         Map<String, List<List<String>>> map = new HashMap<>();
-        courses.stream().sorted(Comparator.comparing(course -> course.title)).forEach(course -> {
-            List<String> instructors = Collections.singletonList(course.instructors);
-            for(String instructor: instructors) {
+
+        for(Course course : courses) {
+            List<String> ins = Arrays.stream(course.getInstructors().split(","))
+                    .map(String::trim)
+                    .toList();
+            for(String instructor : ins) {
                 if(!map.containsKey(instructor)) {
                     List<String> inCourse = new ArrayList<>();
                     List<String> coCourse = new ArrayList<>();
@@ -102,32 +106,24 @@ public class OnlineCoursesAnalyzer {
                     instructorCourseList.add(coCourse);
                     map.put(instructor, instructorCourseList);
                 }
+                List<List<String>> instructorCourses = map.get(instructor);
+                if(ins.size() == 1) {
+                    if(!instructorCourses.get(0).contains(course.getTitle())) {
+                        instructorCourses.get(0).add(course.getTitle());
+                    }
+                } else {
+                    if(!instructorCourses.get(1).contains(course.getTitle())) {
+                        instructorCourses.get(1).add(course.getTitle());
+                    }
+                }
             }
-            if (!map.get(instructors.get(0)).get(0).contains(course.title)) {
-                map.get(instructors.get(0)).get(0).add(course.title);
-            }
-        });
+        }
+        map.forEach((k,v) -> v.forEach(Collections::sort));
         return map;
     }
 
     //4
     public List<String> getCourses(int topK, String by) {
-//        Comparator<Course> comparator;
-//        switch (by) {
-//            case "hours" ->
-//                    comparator = Comparator.comparing(Course::getTotalHours, Comparator.reverseOrder()).thenComparing(Course::getTitle);
-//            case "participants" ->
-//                    comparator = Comparator.comparing(Course::getParticipants, Comparator.reverseOrder()).thenComparing(Course::getTitle);
-//            default -> {
-//                System.out.println("Not a valid by parameter.");
-//                return new ArrayList<>();
-//            }
-//        }
-//
-//        return courses.stream()
-//                .sorted(comparator)
-//                .map(course -> course.title).distinct().limit(topK).toList();
-
         List<String> results = new ArrayList<>();
         switch (by) {
             case "hours" -> {
@@ -139,7 +135,6 @@ public class OnlineCoursesAnalyzer {
                         .thenComparing(Course::getTitle));
             }
             default -> {
-                System.out.println("Not a valid by parameter.");
                 return new ArrayList<>();
             }
         }
@@ -178,255 +173,255 @@ public class OnlineCoursesAnalyzer {
         return null;
     }
 
-}
 
-class Course {
-    String institution;
-    String number;
-    Date launchDate;
-    String title;
-    String instructors;
-    String subject;
-    int year;
-    int honorCode;
-    int participants;
-    int audited;
-    int certified;
-    double percentAudited;
-    double percentCertified;
-    double percentCertified50;
-    double percentVideo;
-    double percentForum;
-    double gradeHigherZero;
-    double totalHours;
+    class Course {
+        String institution;
+        String number;
+        Date launchDate;
+        String title;
+        String instructors;
+        String subject;
+        int year;
+        int honorCode;
+        int participants;
+        int audited;
+        int certified;
+        double percentAudited;
+        double percentCertified;
+        double percentCertified50;
+        double percentVideo;
+        double percentForum;
+        double gradeHigherZero;
+        double totalHours;
 
-    public String getInstitution() {
-        return institution;
-    }
+        public String getInstitution() {
+            return institution;
+        }
 
-    public void setInstitution(String institution) {
-        this.institution = institution;
-    }
+        public void setInstitution(String institution) {
+            this.institution = institution;
+        }
 
-    public String getNumber() {
-        return number;
-    }
+        public String getNumber() {
+            return number;
+        }
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
+        public void setNumber(String number) {
+            this.number = number;
+        }
 
-    public Date getLaunchDate() {
-        return launchDate;
-    }
+        public Date getLaunchDate() {
+            return launchDate;
+        }
 
-    public void setLaunchDate(Date launchDate) {
-        this.launchDate = launchDate;
-    }
+        public void setLaunchDate(Date launchDate) {
+            this.launchDate = launchDate;
+        }
 
-    public String getTitle() {
-        return title;
-    }
+        public String getTitle() {
+            return title;
+        }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+        public void setTitle(String title) {
+            this.title = title;
+        }
 
-    public String getInstructors() {
-        return instructors;
-    }
+        public String getInstructors() {
+            return instructors;
+        }
 
-    public void setInstructors(String instructors) {
-        this.instructors = instructors;
-    }
+        public void setInstructors(String instructors) {
+            this.instructors = instructors;
+        }
 
-    public String getSubject() {
-        return subject;
-    }
+        public String getSubject() {
+            return subject;
+        }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
+        public void setSubject(String subject) {
+            this.subject = subject;
+        }
 
-    public int getYear() {
-        return year;
-    }
+        public int getYear() {
+            return year;
+        }
 
-    public void setYear(int year) {
-        this.year = year;
-    }
+        public void setYear(int year) {
+            this.year = year;
+        }
 
-    public int getHonorCode() {
-        return honorCode;
-    }
+        public int getHonorCode() {
+            return honorCode;
+        }
 
-    public void setHonorCode(int honorCode) {
-        this.honorCode = honorCode;
-    }
+        public void setHonorCode(int honorCode) {
+            this.honorCode = honorCode;
+        }
 
-    public int getParticipants() {
-        return participants;
-    }
+        public int getParticipants() {
+            return participants;
+        }
 
-    public void setParticipants(int participants) {
-        this.participants = participants;
-    }
+        public void setParticipants(int participants) {
+            this.participants = participants;
+        }
 
-    public int getAudited() {
-        return audited;
-    }
+        public int getAudited() {
+            return audited;
+        }
 
-    public void setAudited(int audited) {
-        this.audited = audited;
-    }
+        public void setAudited(int audited) {
+            this.audited = audited;
+        }
 
-    public int getCertified() {
-        return certified;
-    }
+        public int getCertified() {
+            return certified;
+        }
 
-    public void setCertified(int certified) {
-        this.certified = certified;
-    }
+        public void setCertified(int certified) {
+            this.certified = certified;
+        }
 
-    public double getPercentAudited() {
-        return percentAudited;
-    }
+        public double getPercentAudited() {
+            return percentAudited;
+        }
 
-    public void setPercentAudited(double percentAudited) {
-        this.percentAudited = percentAudited;
-    }
+        public void setPercentAudited(double percentAudited) {
+            this.percentAudited = percentAudited;
+        }
 
-    public double getPercentCertified() {
-        return percentCertified;
-    }
+        public double getPercentCertified() {
+            return percentCertified;
+        }
 
-    public void setPercentCertified(double percentCertified) {
-        this.percentCertified = percentCertified;
-    }
+        public void setPercentCertified(double percentCertified) {
+            this.percentCertified = percentCertified;
+        }
 
-    public double getPercentCertified50() {
-        return percentCertified50;
-    }
+        public double getPercentCertified50() {
+            return percentCertified50;
+        }
 
-    public void setPercentCertified50(double percentCertified50) {
-        this.percentCertified50 = percentCertified50;
-    }
+        public void setPercentCertified50(double percentCertified50) {
+            this.percentCertified50 = percentCertified50;
+        }
 
-    public double getPercentVideo() {
-        return percentVideo;
-    }
+        public double getPercentVideo() {
+            return percentVideo;
+        }
 
-    public void setPercentVideo(double percentVideo) {
-        this.percentVideo = percentVideo;
-    }
+        public void setPercentVideo(double percentVideo) {
+            this.percentVideo = percentVideo;
+        }
 
-    public double getPercentForum() {
-        return percentForum;
-    }
+        public double getPercentForum() {
+            return percentForum;
+        }
 
-    public void setPercentForum(double percentForum) {
-        this.percentForum = percentForum;
-    }
+        public void setPercentForum(double percentForum) {
+            this.percentForum = percentForum;
+        }
 
-    public double getGradeHigherZero() {
-        return gradeHigherZero;
-    }
+        public double getGradeHigherZero() {
+            return gradeHigherZero;
+        }
 
-    public void setGradeHigherZero(double gradeHigherZero) {
-        this.gradeHigherZero = gradeHigherZero;
-    }
+        public void setGradeHigherZero(double gradeHigherZero) {
+            this.gradeHigherZero = gradeHigherZero;
+        }
 
-    public double getTotalHours() {
-        return totalHours;
-    }
+        public double getTotalHours() {
+            return totalHours;
+        }
 
-    public void setTotalHours(double totalHours) {
-        this.totalHours = totalHours;
-    }
+        public void setTotalHours(double totalHours) {
+            this.totalHours = totalHours;
+        }
 
-    public double getMedianHoursCertification() {
-        return medianHoursCertification;
-    }
+        public double getMedianHoursCertification() {
+            return medianHoursCertification;
+        }
 
-    public void setMedianHoursCertification(double medianHoursCertification) {
-        this.medianHoursCertification = medianHoursCertification;
-    }
+        public void setMedianHoursCertification(double medianHoursCertification) {
+            this.medianHoursCertification = medianHoursCertification;
+        }
 
-    public double getMedianAge() {
-        return medianAge;
-    }
+        public double getMedianAge() {
+            return medianAge;
+        }
 
-    public void setMedianAge(double medianAge) {
-        this.medianAge = medianAge;
-    }
+        public void setMedianAge(double medianAge) {
+            this.medianAge = medianAge;
+        }
 
-    public double getPercentMale() {
-        return percentMale;
-    }
+        public double getPercentMale() {
+            return percentMale;
+        }
 
-    public void setPercentMale(double percentMale) {
-        this.percentMale = percentMale;
-    }
+        public void setPercentMale(double percentMale) {
+            this.percentMale = percentMale;
+        }
 
-    public double getPercentFemale() {
-        return percentFemale;
-    }
+        public double getPercentFemale() {
+            return percentFemale;
+        }
 
-    public void setPercentFemale(double percentFemale) {
-        this.percentFemale = percentFemale;
-    }
+        public void setPercentFemale(double percentFemale) {
+            this.percentFemale = percentFemale;
+        }
 
-    public double getPercentDegree() {
-        return percentDegree;
-    }
+        public double getPercentDegree() {
+            return percentDegree;
+        }
 
-    public void setPercentDegree(double percentDegree) {
-        this.percentDegree = percentDegree;
-    }
+        public void setPercentDegree(double percentDegree) {
+            this.percentDegree = percentDegree;
+        }
 
-    double medianHoursCertification;
-    double medianAge;
-    double percentMale;
-    double percentFemale;
-    double percentDegree;
+        double medianHoursCertification;
+        double medianAge;
+        double percentMale;
+        double percentFemale;
+        double percentDegree;
 
-    public Course(String institution, String number, Date launchDate,
-                  String title, String instructors, String subject,
-                  int year, int honorCode, int participants,
-                  int audited, int certified, double percentAudited,
-                  double percentCertified, double percentCertified50,
-                  double percentVideo, double percentForum, double gradeHigherZero,
-                  double totalHours, double medianHoursCertification,
-                  double medianAge, double percentMale, double percentFemale,
-                  double percentDegree) {
-        this.institution = institution;
-        this.number = number;
-        this.launchDate = launchDate;
-        if (title.startsWith("\"")) title = title.substring(1);
-        if (title.endsWith("\"")) title = title.substring(0, title.length() - 1);
-        this.title = title;
-        if (instructors.startsWith("\"")) instructors = instructors.substring(1);
-        if (instructors.endsWith("\"")) instructors = instructors.substring(0, instructors.length() - 1);
-        this.instructors = instructors;
-        if (subject.startsWith("\"")) subject = subject.substring(1);
-        if (subject.endsWith("\"")) subject = subject.substring(0, subject.length() - 1);
-        this.subject = subject;
-        this.year = year;
-        this.honorCode = honorCode;
-        this.participants = participants;
-        this.audited = audited;
-        this.certified = certified;
-        this.percentAudited = percentAudited;
-        this.percentCertified = percentCertified;
-        this.percentCertified50 = percentCertified50;
-        this.percentVideo = percentVideo;
-        this.percentForum = percentForum;
-        this.gradeHigherZero = gradeHigherZero;
-        this.totalHours = totalHours;
-        this.medianHoursCertification = medianHoursCertification;
-        this.medianAge = medianAge;
-        this.percentMale = percentMale;
-        this.percentFemale = percentFemale;
-        this.percentDegree = percentDegree;
+        public Course(String institution, String number, Date launchDate,
+                      String title, String instructors, String subject,
+                      int year, int honorCode, int participants,
+                      int audited, int certified, double percentAudited,
+                      double percentCertified, double percentCertified50,
+                      double percentVideo, double percentForum, double gradeHigherZero,
+                      double totalHours, double medianHoursCertification,
+                      double medianAge, double percentMale, double percentFemale,
+                      double percentDegree) {
+            this.institution = institution;
+            this.number = number;
+            this.launchDate = launchDate;
+            if (title.startsWith("\"")) title = title.substring(1);
+            if (title.endsWith("\"")) title = title.substring(0, title.length() - 1);
+            this.title = title;
+            if (instructors.startsWith("\"")) instructors = instructors.substring(1);
+            if (instructors.endsWith("\"")) instructors = instructors.substring(0, instructors.length() - 1);
+            this.instructors = instructors;
+            if (subject.startsWith("\"")) subject = subject.substring(1);
+            if (subject.endsWith("\"")) subject = subject.substring(0, subject.length() - 1);
+            this.subject = subject;
+            this.year = year;
+            this.honorCode = honorCode;
+            this.participants = participants;
+            this.audited = audited;
+            this.certified = certified;
+            this.percentAudited = percentAudited;
+            this.percentCertified = percentCertified;
+            this.percentCertified50 = percentCertified50;
+            this.percentVideo = percentVideo;
+            this.percentForum = percentForum;
+            this.gradeHigherZero = gradeHigherZero;
+            this.totalHours = totalHours;
+            this.medianHoursCertification = medianHoursCertification;
+            this.medianAge = medianAge;
+            this.percentMale = percentMale;
+            this.percentFemale = percentFemale;
+            this.percentDegree = percentDegree;
+        }
     }
 }
