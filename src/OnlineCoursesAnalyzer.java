@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This is just a demo for you, please run it on JDK17.
@@ -45,22 +46,87 @@ public class OnlineCoursesAnalyzer {
 
     //1
     public Map<String, Integer> getPtcpCountByInst() {
-        return null;
+        Map<String, Integer> map = new TreeMap<>();
+        for (Course course : courses) {
+            String institution = course.institution;
+            int participants = course.participants;
+            if (!map.containsKey(institution)) {
+                map.put(institution, participants);
+            } else {
+                map.put(institution, map.get(institution) + participants);
+            }
+        }
+        return map;
     }
 
     //2
     public Map<String, Integer> getPtcpCountByInstAndSubject() {
-        return null;
+        Map<String, Integer> map = new HashMap<>();
+        for (Course c : courses) {
+            String key = c.institution + "-" + c.subject;
+            int value = c.participants;
+            if (map.containsKey(key)) {
+                value += map.get(key);
+            }
+            map.put(key, value);
+        }
+
+        List<Map.Entry<String, Integer>> list = new ArrayList<>(map.entrySet());
+        list.sort((o1, o2) -> {
+            int valueCompare = o2.getValue().compareTo(o1.getValue());
+            if (valueCompare != 0) {
+                return valueCompare;
+            } else {
+                return o1.getKey().compareTo(o2.getKey());
+            }
+        });
+
+        LinkedHashMap<String, Integer> sMap = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : list) {
+            sMap.put(entry.getKey(), entry.getValue());
+        }
+        return sMap;
     }
 
     //3
     public Map<String, List<List<String>>> getCourseListOfInstructor() {
-        return null;
+        Map<String, List<List<String>>> map = new HashMap<>();
+        courses.stream().sorted(Comparator.comparing(course -> course.title)).forEach(course -> {
+            List<String> instructors = Collections.singletonList(course.instructors);
+            for(String instructor: instructors) {
+                if(!map.containsKey(instructor)) {
+                    List<String> inCourse = new ArrayList<>();
+                    List<String> coCourse = new ArrayList<>();
+                    List<List<String>> instructorCourseList = new ArrayList<>();
+                    instructorCourseList.add(inCourse);
+                    instructorCourseList.add(coCourse);
+                    map.put(instructor, instructorCourseList);
+                }
+            }
+            if (!map.get(instructors.get(0)).get(0).contains(course.title)) {
+                map.get(instructors.get(0)).get(0).add(course.title);
+            }
+        });
+        return map;
     }
 
     //4
     public List<String> getCourses(int topK, String by) {
-        return null;
+        Comparator<Course> comparator;
+        switch (by) {
+            case "hours" ->
+                    comparator = Comparator.comparing(Course::getTotalHours, Comparator.reverseOrder()).thenComparing(Course::getTitle);
+            case "participants" ->
+                    comparator = Comparator.comparing(Course::getParticipants, Comparator.reverseOrder()).thenComparing(Course::getTitle);
+            default -> {
+                System.out.println("Not a valid by parameter.");
+                return new ArrayList<>();
+            }
+        }
+
+        return courses.stream()
+                .sorted(comparator)
+                .map(course -> course.title).distinct().limit(topK).toList();
     }
 
     //5
@@ -94,6 +160,191 @@ class Course {
     double percentForum;
     double gradeHigherZero;
     double totalHours;
+
+    public String getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(String institution) {
+        this.institution = institution;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public Date getLaunchDate() {
+        return launchDate;
+    }
+
+    public void setLaunchDate(Date launchDate) {
+        this.launchDate = launchDate;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getInstructors() {
+        return instructors;
+    }
+
+    public void setInstructors(String instructors) {
+        this.instructors = instructors;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getHonorCode() {
+        return honorCode;
+    }
+
+    public void setHonorCode(int honorCode) {
+        this.honorCode = honorCode;
+    }
+
+    public int getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(int participants) {
+        this.participants = participants;
+    }
+
+    public int getAudited() {
+        return audited;
+    }
+
+    public void setAudited(int audited) {
+        this.audited = audited;
+    }
+
+    public int getCertified() {
+        return certified;
+    }
+
+    public void setCertified(int certified) {
+        this.certified = certified;
+    }
+
+    public double getPercentAudited() {
+        return percentAudited;
+    }
+
+    public void setPercentAudited(double percentAudited) {
+        this.percentAudited = percentAudited;
+    }
+
+    public double getPercentCertified() {
+        return percentCertified;
+    }
+
+    public void setPercentCertified(double percentCertified) {
+        this.percentCertified = percentCertified;
+    }
+
+    public double getPercentCertified50() {
+        return percentCertified50;
+    }
+
+    public void setPercentCertified50(double percentCertified50) {
+        this.percentCertified50 = percentCertified50;
+    }
+
+    public double getPercentVideo() {
+        return percentVideo;
+    }
+
+    public void setPercentVideo(double percentVideo) {
+        this.percentVideo = percentVideo;
+    }
+
+    public double getPercentForum() {
+        return percentForum;
+    }
+
+    public void setPercentForum(double percentForum) {
+        this.percentForum = percentForum;
+    }
+
+    public double getGradeHigherZero() {
+        return gradeHigherZero;
+    }
+
+    public void setGradeHigherZero(double gradeHigherZero) {
+        this.gradeHigherZero = gradeHigherZero;
+    }
+
+    public double getTotalHours() {
+        return totalHours;
+    }
+
+    public void setTotalHours(double totalHours) {
+        this.totalHours = totalHours;
+    }
+
+    public double getMedianHoursCertification() {
+        return medianHoursCertification;
+    }
+
+    public void setMedianHoursCertification(double medianHoursCertification) {
+        this.medianHoursCertification = medianHoursCertification;
+    }
+
+    public double getMedianAge() {
+        return medianAge;
+    }
+
+    public void setMedianAge(double medianAge) {
+        this.medianAge = medianAge;
+    }
+
+    public double getPercentMale() {
+        return percentMale;
+    }
+
+    public void setPercentMale(double percentMale) {
+        this.percentMale = percentMale;
+    }
+
+    public double getPercentFemale() {
+        return percentFemale;
+    }
+
+    public void setPercentFemale(double percentFemale) {
+        this.percentFemale = percentFemale;
+    }
+
+    public double getPercentDegree() {
+        return percentDegree;
+    }
+
+    public void setPercentDegree(double percentDegree) {
+        this.percentDegree = percentDegree;
+    }
+
     double medianHoursCertification;
     double medianAge;
     double percentMale;
